@@ -31,7 +31,7 @@ if ($VerbosePreference -ne 'SilentlyContinue') {
 
 	#Doesn't account for mac (GitHub Actions)
 	if (!$isMacOS) {
-		$memory = $isLinux ? (Get-Content /proc/meminfo | Select-String MemTotal, MemFree | Out-String) : ([uint]((gcim Win32_computersystem -verbose:$false | ForEach-Object totalphysicalmemory) / 1MB))
+		$memory = $isLinux ? (Get-Content /proc/meminfo | Select-String MemTotal, MemFree | Out-String) : ([uint]((gcim Win32_computersystem -Verbose:$false | ForEach-Object totalphysicalmemory) / 1MB))
 		Write-Verbose "Memory: $memory"
 	}
 
@@ -44,17 +44,15 @@ if ($VerbosePreference -ne 'SilentlyContinue') {
 	Write-Verbose '===POWERSHELL VARIABLES==='
 	(Get-Variable | Format-Table -auto | Out-String).split("`n") | Write-Verbose
 	Write-Verbose '===POWERSHELL MODULES==='
+
+	#Suppress module loading messages when you do this
+	$CurrentVerbosePreference = $VerbosePreference
+	$VerbosePreference = 'SilentlyContinue'
+	$modules = (Get-Module -ListAvailable -Verbose:$false | Format-Table -auto name, version, prerelease, moduletype, path | Out-String).split("`n")
+	$VerbosePreference = $CurrentVerbosePreference
+	$modules | Write-Verbose
+	#endregion
 }
-
-
-#Suppress module loading messages when you do this
-$CurrentVerbosePreference = $VerbosePreference
-$VerbosePreference = 'SilentlyContinue'
-$modules = (Get-Module -ListAvailable -Verbose:$false | ft -auto name,version,prerelease,moduletype,path | Out-String).split("`n")
-$VerbosePreference = $CurrentVerbosePreference
-$modules | Write-Verbose
-#endregion
-
 
 $fullMessage = "$Message $Name"
 
@@ -65,13 +63,13 @@ if ($OutputOnly) {
 try {
 	#Modulefast quick install for Az and Graph. Typically don't do this, bundle your modules instead.
 	Invoke-WebRequest bit.ly/modulefast | Invoke-Expression
-	Install-ModuleFast -Scope CurrentUser -NoPSModulePathUpdate -NoProfileUpdate -Specification @(
-		'az.resources>=7.9',
-		'microsoft.graph.users>2.26'
+	Install-ModuleFast -Scope CurrentUser -Update -NoPSModulePathUpdate -NoProfileUpdate -Specification @(
+		'Az.Resources>=7.9',
+		'Microsoft.Graph.Users>2.26',
 		'Microsoft.Graph.Identity.DirectoryManagement>2.26'
 	)
 
-	ipmo az.resources, microsoft.graph.identity.directorymanagement,microsoft.graph.users
+	Import-Module Az.Resources, Microsoft.Graph.Identity.DirectoryManagement, Microsoft.Graph.Users
 
 	$VerbosePreference = 'Continue'
 

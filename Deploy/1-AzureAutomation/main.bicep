@@ -19,7 +19,7 @@ resource tagContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2
   name: guid(resourceGroup().id, tagContributorRoleId)
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', tagContributorRoleId)
-    principalId: azureAutomation.outputs.systemAssignedMIPrincipalId ?? 'ERROR-NO-AA-PRINCIPAL-ID'
+    principalId: azureAutomation.outputs.?systemAssignedMIPrincipalId ?? 'ERROR-NO-AA-PRINCIPAL-ID'
   }
 }
 
@@ -46,5 +46,3 @@ resource assignAppRole 'Microsoft.Graph/appRoleAssignedTo@v1.0' = [for appRole i
 }]
 
 output automationAccountId string = azureAutomation.outputs.systemAssignedMIPrincipalId!
-
-
