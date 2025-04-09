@@ -76,7 +76,8 @@ Trace-AICommand -Name ("ManyWays-$Name" -replace ' ') {
 			'Microsoft.Graph.Identity.DirectoryManagement>2.26'
 		)
 
-		Import-Module Az.Resources, Microsoft.Graph.Identity.DirectoryManagement, Microsoft.Graph.Users
+		#Import the modules explicitly since we will use them anyways, and suppress the verbose loading output to not pollute the logs.
+		Import-Module Az.Resources, Microsoft.Graph.Identity.DirectoryManagement, Microsoft.Graph.Users -Verbose:$false
 
 		#region Azure Tag
 
